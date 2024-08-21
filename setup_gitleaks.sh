@@ -38,43 +38,58 @@ case "$OS" in
         ;;
 esac
 
-# URL for download Gitleaks
-DOWNLOAD_URL="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${ARCHIVE_FILENAME}"
-
-# download Gitleaks
-echo "Downloading Gitleaks from $DOWNLOAD_URL..."
-curl -sSfL "$DOWNLOAD_URL" -o gitleaks_archive
-
-# Check path
-mkdir -p "$INSTALL_DIR"
-
-# Unpack
-if [[ "$ARCHIVE_FILENAME" == *.tar.gz ]]; then
-    tar -xzvf gitleaks_archive -C "$INSTALL_DIR"
-elif [[ "$ARCHIVE_FILENAME" == *.zip ]]; then
-    unzip -d "$INSTALL_DIR" gitleaks_archive
+# Check if Gitleaks installed and correct version
+if command -v gitleaks &> /dev/null; then
+    INSTALLED_VERSION=$(gitleaks version | grep -oP '\d+\.\d+\.\d+')
+    if [ "$INSTALLED_VERSION" == "$GITLEAKS_VERSION" ]; then
+        echo "Gitleaks $GITLEAKS_VERSION is already installed."
+    else
+        echo "Different version of Gitleaks installed. Updating to $GITLEAKS_VERSION..."
+        rm -f "$INSTALL_DIR/gitleaks"
+    fi
 else
-    echo "Unknown archive format: $ARCHIVE_FILENAME"
-    exit 1
+    echo "Gitleaks is not installed. Installing..."
 fi
 
-# Clean after updates
-rm gitleaks_archive
+# URL for download Gitleaks
+if [ ! -f "$INSTALL_DIR/gitleaks" ]; then
+    DOWNLOAD_URL="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${ARCHIVE_FILENAME}"
 
-# check if $HOME/.local/bin in PATH
-if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
-    echo "Adding $INSTALL_DIR to PATH..."
-    export PATH="$INSTALL_DIR:$PATH"
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc  # or ~/.zshrc для Zsh
+    # download Gitleaks
+    echo "Downloading Gitleaks from $DOWNLOAD_URL..."
+    curl -sSfL "$DOWNLOAD_URL" -o gitleaks_archive
+
+    # Check path
+    mkdir -p "$INSTALL_DIR"
+
+    # Unpack
+    if [[ "$ARCHIVE_FILENAME" == *.tar.gz ]]; then
+        tar -xzvf gitleaks_archive -C "$INSTALL_DIR"
+    elif [[ "$ARCHIVE_FILENAME" == *.zip ]]; then
+        unzip -d "$INSTALL_DIR" gitleaks_archive
+    else
+        echo "Unknown archive format: $ARCHIVE_FILENAME"
+        exit 1
+    fi
+
+    # Clean after updates
+    rm gitleaks_archive
+
+    # check if $HOME/.local/bin in PATH
+    if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
+        echo "Adding $INSTALL_DIR to PATH..."
+        export PATH="$INSTALL_DIR:$PATH"
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc  # or ~/.zshrc для Zsh
+    fi
+
+    # Check, if Gitleaks installed
+    if ! command -v gitleaks &> /dev/null; then
+        echo "Failed to install Gitleaks. Commit rejected."
+        exit 1
+    fi
+
+    echo "Gitleaks installed successfully."
 fi
-
-# Check, if Gitleaks installed
-if ! command -v gitleaks &> /dev/null; then
-    echo "Failed to install Gitleaks. Commit rejected."
-    exit 1
-fi
-
-echo "Gitleaks installed successfully."
 
 # Check if Gitleaks enables
 check_hook_enabled() {
