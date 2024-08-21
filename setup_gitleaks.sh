@@ -119,7 +119,12 @@ setup_pre_commit_hook() {
 # run Gitleaks
 run_gitleaks() {
     echo "Running Gitleaks..."
-    gitleaks protect --staged --source . --verbose
+    # check .gitleaks.toml
+    if [ -f ".gitleaks.toml" ]; then
+        gitleaks protect --staged --source . --config .gitleaks.toml --verbose
+    else
+        gitleaks protect --staged --source . --verbose
+    fi
 
     if [ $? -ne 0 ]; then
         echo "Gitleaks detected secrets, commit rejected."
