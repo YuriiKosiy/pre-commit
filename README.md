@@ -15,8 +15,15 @@ The script is designed to install Gitleaks entirely within your user space, spec
 
 ## Installation Guide
 
-### Step 1: Clone the Repository
+### 1: Run the Setup Scrip
 
+To install Gitleaks and configure it as a pre-commit hook, you can run the following single command:
+
+```sh
+curl https://raw.githubusercontent.com/YuriiKosiy/pre-commit/main/setup_gitleaks.sh | sh
+```
+
+### 2: Alternatively, you can download the script manually and Run
 Clone this repository to your local machine:
 
 ```bash
@@ -24,9 +31,7 @@ git clone https://github.com/YuriiKosiy/pre-commit.git
 cd pre-commit
 ```
 
-### Step 2: Run the Setup Script
-
-To install Gitleaks and configure it as a pre-commit hook, execute the setup script:
+Run it manualy:
 
 ```bash
 ./setup_gitleaks.sh
@@ -37,7 +42,7 @@ To install Gitleaks and configure it as a pre-commit hook, execute the setup scr
  2. Set up the pre-commit hook to automatically run Gitleaks before each commit.
  3. Use the custom rules specified in `.gitleaks.toml`, if available.
 
-### Step 3: Verify the Installation
+### 3: Verify the Installation
 
 You can verify that Gitleaks is installed correctly by checking its version:
 ```bash
